@@ -1731,6 +1731,15 @@ document.getElementById('album-name-input').addEventListener('keydown',e=>{if(e.
 let toastTimer;
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2200);}
 
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
 // upload init handled in showScreen directly
 
 // SW
@@ -1885,7 +1894,7 @@ function fdConnect() {
         const name = fdMeta?.name || 'received-file';
         const el   = document.createElement('div');
         el.className = 'fd-recv-file';
-        el.innerHTML = `<span class="fd-recv-file-name">${name}</span><a class="fd-recv-file-dl" href="${url}" download="${name}">Save ↓</a>`;
+        el.innerHTML = `<span class="fd-recv-file-name">${escapeHtml(name)}</span><a class="fd-recv-file-dl" href="${url}" download="${escapeHtml(name)}">Save ↓</a>`;
         document.getElementById('fd-recv-files').prepend(el);
         document.getElementById('fd-recv-fill').style.width = '100%';
         document.getElementById('fd-recv-pct').textContent = '100%';
@@ -1975,7 +1984,7 @@ function imgpdfRenderList() {
         <button class="imgpdf-move-btn" onclick="imgpdfMove(${i}, ${i + 1})" ${i === total - 1 ? 'disabled' : ''} title="Move Down">▼</button>
       </div>
       <img class="imgpdf-thumb" src="${entry.dataUrl}" style="transform:rotate(${entry.rotation || 0}deg)">
-      <span class="imgpdf-item-name">${entry.file.name}</span>
+      <span class="imgpdf-item-name">${escapeHtml(entry.file.name)}</span>
       <button class="imgpdf-item-del" onclick="imgpdfRemove(${i})" title="Remove">✕</button>`;
     list.appendChild(el);
   });
