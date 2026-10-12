@@ -1,9 +1,13 @@
-const CACHE_NAME = 'catnon-helper-v7';
+const CACHE_NAME = 'catnon-helper-v9';
 const PRECACHE = [
   './',
   './index.html',
+  './style.css',
   './manifest.json',
   './icon.png',
+  './lib/three/three.core.js',
+  './lib/three/three.module.js',
+  './three.js-master/build/three.webgpu.js',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
   'https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js',
@@ -13,7 +17,11 @@ const PRECACHE = [
 
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE_NAME).then(c => c.addAll(PRECACHE)).then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then(c =>
+      // Resilient precache: addAll fails atomically if any single URL 404s,
+      // so fetch one-by-one and keep going on failures.
+      Promise.allSettled(PRECACHE.map(url => c.add(url)))
+    ).then(() => self.skipWaiting())
   );
 });
 

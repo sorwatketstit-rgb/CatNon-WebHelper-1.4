@@ -1,9 +1,9 @@
 CatNon School Helper
-A lightweight, Progressive Web App for students. Stores all data locally on the deviceo( no account or internet connection required after the first load).
+A lightweight, Progressive Web App for students. Stores all data locally on the device (no account required). Internet connection needed — NOT offline-safe.
 
 Files:
 - index.html: Main app. All UI, logic, and styles in one file
-- sw.js: Service worker. Enables offline use, asset caching, and share target handling
+- sw.js: Service worker. Asset caching, share target handling. NOTE: the app is NOT offline-safe — core libraries (Leaflet, PeerJS, jsPDF, three.js) need network access and may fail without connectivity.
 - manifest.json: PWA manifest. Allows "Add to Home Screen" and system share sheet integration
 - icon.png: App icon (512×512)
 
@@ -50,12 +50,12 @@ FileDrop
 - Recommended max file size: 100 MB
 
 Image to PDF
-- Convert images into PDF format (works both online via jsPDF and 100% offline with native builder)
+- Convert images into PDF format (online via jsPDF from CDN)
 - Reorder pages via direct page number inputs or Up/Down move buttons
 - Reorder Gallery Modal view to inspect rotated pages and adjust sequence before exporting
 
 QR Code Generator
-- Generates QR codes for links or text offline with single-tap PNG download
+- Generates QR codes for links or text with single-tap PNG download
 
 Data Storage
 All data is stored in the browser's **IndexedDB** under the database `CatNonHelperDB`. Nothing is sent to any server.
@@ -78,7 +78,8 @@ Chrome (Android) is recommended. Safari (iOS 17+) is supported but has some limi
 
 Known Limitations
 - Photos are stored as base64 in IndexedDB — large photo libraries may hit browser storage limits
-- Map tiles do not cache offline (only the map library itself is cached)
+- Map tiles do not cache offline; they require an active internet connection
 - FileDrop and Receiver require an internet connection for the initial peer handshake
+- CDN libraries (Leaflet, PeerJS, jsPDF, three.js) fail without connectivity — the app is NOT offline-safe
 - No export or cloud backup functionality
 - Single-user, single-device data (no sync between browsers or devices)
