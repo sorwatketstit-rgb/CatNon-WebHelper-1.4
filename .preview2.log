@@ -1,0 +1,18 @@
+::1 - - [12/Oct/2026 17:26:32] "GET /style.css HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 17:26:32] "GET /style.css HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 17:26:52] "GET /style.css HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 17:27:22] "GET /style.css HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 17:27:43] "GET /index.html HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 17:27:43] "GET /style.css HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 17:27:43] "GET /nav3d.js HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 17:27:43] "GET /lib/three/three.module.js HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 17:27:43] "GET /sw.js HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 17:27:43] "GET / HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 17:27:43] code 404, message File not found
+::1 - - [12/Oct/2026 17:27:43] "GET /manifest.json HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 17:27:43] "GET /icon.png HTTP/1.1" 404 -
+::1 - - [12/Oct/2026 17:27:43] "GET /lib/three/three.core.js HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 17:27:43] "GET /three.js-master/build/three.webgpu.js HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 17:27:43] code 404, message File not found
+::1 - - [12/Oct/2026 17:27:43] "GET /favicon.ico HTTP/1.1" 404 -
+::1 - - [12/Oct/2026 17:29:54] "GET /nav3d.js HTTP/1.1" 304 -

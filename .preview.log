@@ -1,0 +1,454 @@
+::1 - - [12/Oct/2026 16:30:22] "GET /index.html HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 16:30:28] "GET /index.html HTTP/1.1" 200 -
+----------------------------------------
+Exception occurred during processing of request from ('::ffff:127.0.0.1', 62980, 0, 0)
+::1 - - [12/Oct/2026 16:30:31] "GET /index.html HTTP/1.1" 200 -
+Traceback (most recent call last):
+  File "C:\Program Files\Python313\Lib\socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 1342, in finish_request
+    self.RequestHandlerClass(request, client_address, self,
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                             directory=args.directory)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 683, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 447, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 415, in handle_one_request
+    self.raw_requestline = self.rfile.readline(65537)
+                           ~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Program Files\Python313\Lib\socket.py", line 719, in readinto
+    return self._sock.recv_into(b)
+           ~~~~~~~~~~~~~~~~~~~~^^^
+ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host
+----------------------------------------
+::1 - - [12/Oct/2026 16:30:31] "GET /index.html HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 16:30:32] "GET /style.css HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 16:30:32] "GET /sw.js HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 16:30:33] "GET / HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 16:30:33] "GET /manifest.json HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 16:30:33] code 404, message File not found
+::1 - - [12/Oct/2026 16:30:33] "GET /icon.png HTTP/1.1" 404 -
+::1 - - [12/Oct/2026 16:30:33] code 404, message File not found
+::1 - - [12/Oct/2026 16:30:33] "GET /favicon.ico HTTP/1.1" 404 -
+::1 - - [12/Oct/2026 16:33:41] "GET /index.html HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:33:41] "GET /style.css HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:33:41] "GET /sw.js HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:33:42] "GET / HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:33:42] code 404, message File not found
+::1 - - [12/Oct/2026 16:33:42] "GET /icon.png HTTP/1.1" 404 -
+::1 - - [12/Oct/2026 16:33:42] code 404, message File not found
+::1 - - [12/Oct/2026 16:33:42] "GET /favicon.ico HTTP/1.1" 404 -
+::1 - - [12/Oct/2026 16:35:01] code 404, message File not found
+::1 - - [12/Oct/2026 16:35:01] "GET /favicon.ico HTTP/1.1" 404 -
+::1 - - [12/Oct/2026 16:35:02] "GET /style.css HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 16:35:02] "GET /sw.js HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:35:03] code 404, message File not found
+::1 - - [12/Oct/2026 16:35:03] "GET /icon.png HTTP/1.1" 404 -
+::1 - - [12/Oct/2026 16:36:20] "GET /index.html HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:36:20] code 404, message File not found
+::1 - - [12/Oct/2026 16:36:20] "GET /favicon.ico HTTP/1.1" 404 -
+::1 - - [12/Oct/2026 16:36:20] "GET /style.css HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 16:36:21] "GET /sw.js HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:36:21] "GET /style.css HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:36:21] "GET / HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:36:21] code 404, message File not found
+::1 - - [12/Oct/2026 16:36:21] "GET /icon.png HTTP/1.1" 404 -
+::1 - - [12/Oct/2026 16:39:04] code 404, message File not found
+::1 - - [12/Oct/2026 16:39:04] "GET /favicon.ico HTTP/1.1" 404 -
+::1 - - [12/Oct/2026 16:39:05] "GET /index.html HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:39:05] "GET /style.css HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 16:39:06] "GET /sw.js HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:39:06] "GET / HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:39:06] "GET /style.css HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:39:06] code 404, message File not found
+::1 - - [12/Oct/2026 16:39:06] "GET /icon.png HTTP/1.1" 404 -
+::1 - - [12/Oct/2026 16:43:58] "GET /index.html HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 16:43:58] "GET /style.css HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:43:58] "GET /lib/three/three.module.js HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 16:43:58] "GET /sw.js HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:43:58] "GET / HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 16:43:58] "GET /lib/three/three.core.js HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 16:43:58] code 404, message File not found
+::1 - - [12/Oct/2026 16:43:58] "GET /icon.png HTTP/1.1" 404 -
+::1 - - [12/Oct/2026 16:43:59] code 404, message File not found
+::1 - - [12/Oct/2026 16:43:59] "GET /favicon.ico HTTP/1.1" 404 -
+::1 - - [12/Oct/2026 16:44:28] "GET /sw.js HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 16:44:28] "GET /index.html HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:44:28] "GET / HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:44:28] "GET /style.css HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:44:28] code 404, message File not found
+::1 - - [12/Oct/2026 16:44:28] "GET /icon.png HTTP/1.1" 404 -
+::1 - - [12/Oct/2026 16:44:28] "GET /lib/three/three.module.js HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:44:28] "GET /lib/three/three.core.js HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:44:28] "GET /three.js-master/build/three.webgpu.js HTTP/1.1" 200 -
+----------------------------------------
+Exception occurred during processing of request from ('::1', 63192, 0, 0)
+Traceback (most recent call last):
+  File "C:\Program Files\Python313\Lib\socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 1342, in finish_request
+    self.RequestHandlerClass(request, client_address, self,
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                             directory=args.directory)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 683, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 447, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 435, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 690, in do_GET
+    self.copyfile(f, self.wfile)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 892, in copyfile
+    shutil.copyfileobj(source, outputfile)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+    ~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
+----------------------------------------
+::1 - - [12/Oct/2026 16:45:06] "GET /sw.js HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:45:06] "GET / HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:45:06] "GET /index.html HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:45:06] "GET /style.css HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:45:06] code 404, message File not found
+::1 - - [12/Oct/2026 16:45:06] "GET /icon.png HTTP/1.1" 404 -
+::1 - - [12/Oct/2026 16:45:06] "GET /lib/three/three.core.js HTTP/1.1" 200 -
+----------------------------------------
+Exception occurred during processing of request from ('::1', 63202, 0, 0)
+Traceback (most recent call last):
+  File "C:\Program Files\Python313\Lib\socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 1342, in finish_request
+    self.RequestHandlerClass(request, client_address, self,
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                             directory=args.directory)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+::1 - - [12/Oct/2026 16:45:06] "GET /lib/three/three.module.js HTTP/1.1" 200 -
+  File "C:\Program Files\Python313\Lib\http\server.py", line 683, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 447, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 435, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 690, in do_GET
+    self.copyfile(f, self.wfile)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 892, in copyfile
+    shutil.copyfileobj(source, outputfile)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+    ~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
+----------------------------------------
+----------------------------------------
+Exception occurred during processing of request from ('::1', 63203, 0, 0)
+Traceback (most recent call last):
+  File "C:\Program Files\Python313\Lib\socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 1342, in finish_request
+    self.RequestHandlerClass(request, client_address, self,
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                             directory=args.directory)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 683, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 447, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 435, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 690, in do_GET
+    self.copyfile(f, self.wfile)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 892, in copyfile
+    shutil.copyfileobj(source, outputfile)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+    ~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
+----------------------------------------
+::1 - - [12/Oct/2026 16:45:35] "GET /lib/three/three.module.js HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 16:45:35] "GET /three.js-master/build/three.webgpu.js HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 16:46:02] code 404, message File not found
+::1 - - [12/Oct/2026 16:46:02] "GET /favicon.ico HTTP/1.1" 404 -
+::1 - - [12/Oct/2026 16:46:03] "GET /index.html HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:46:03] "GET /style.css HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:46:03] "GET /lib/three/three.module.js HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 16:46:03] "GET /sw.js HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:46:03] "GET / HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:46:03] code 404, message File not found
+::1 - - [12/Oct/2026 16:46:03] "GET /icon.png HTTP/1.1" 404 -
+::1 - - [12/Oct/2026 16:46:04] "GET /lib/three/three.core.js HTTP/1.1" 200 -
+----------------------------------------
+Exception occurred during processing of request from ('::1', 57519, 0, 0)
+Traceback (most recent call last):
+  File "C:\Program Files\Python313\Lib\socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 1342, in finish_request
+    self.RequestHandlerClass(request, client_address, self,
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                             directory=args.directory)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 683, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 447, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 435, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 690, in do_GET
+    self.copyfile(f, self.wfile)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 892, in copyfile
+    shutil.copyfileobj(source, outputfile)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+    ~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
+----------------------------------------
+::1 - - [12/Oct/2026 16:46:04] "GET /lib/three/three.core.js HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 16:46:30] "GET /sw.js HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:46:30] "GET / HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:46:30] "GET /index.html HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:46:30] code 404, message File not found
+::1 - - [12/Oct/2026 16:46:30] "GET /icon.png HTTP/1.1" 404 -
+::1 - - [12/Oct/2026 16:46:30] "GET /lib/three/three.core.js HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:46:30] "GET /lib/three/three.module.js HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:47:08] "GET /sw.js HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:47:08] "GET /index.html HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:47:08] "GET / HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:47:08] "GET /style.css HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:47:08] code 404, message File not found
+::1 - - [12/Oct/2026 16:47:08] "GET /icon.png HTTP/1.1" 404 -
+::1 - - [12/Oct/2026 16:47:08] "GET /lib/three/three.core.js HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:47:08] "GET /lib/three/three.module.js HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:47:08] "GET /three.js-master/build/three.webgpu.js HTTP/1.1" 200 -
+----------------------------------------
+Exception occurred during processing of request from ('::1', 55825, 0, 0)
+Traceback (most recent call last):
+  File "C:\Program Files\Python313\Lib\socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 1342, in finish_request
+    self.RequestHandlerClass(request, client_address, self,
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                             directory=args.directory)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 683, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 447, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 435, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 690, in do_GET
+    self.copyfile(f, self.wfile)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 892, in copyfile
+    shutil.copyfileobj(source, outputfile)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+    ~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host
+----------------------------------------
+::1 - - [12/Oct/2026 16:47:23] "GET /sw.js HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:47:23] code 404, message File not found
+::1 - - [12/Oct/2026 16:47:23] "GET /icon.png HTTP/1.1" 404 -
+::1 - - [12/Oct/2026 16:47:37] "GET /sw.js HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:47:37] "GET /index.html HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:47:37] "GET / HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:47:37] code 404, message File not found
+::1 - - [12/Oct/2026 16:47:37] "GET /icon.png HTTP/1.1" 404 -
+::1 - - [12/Oct/2026 16:47:37] "GET /lib/three/three.core.js HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:47:37] "GET /lib/three/three.module.js HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:47:37] "GET /three.js-master/build/three.webgpu.js HTTP/1.1" 200 -
+----------------------------------------
+Exception occurred during processing of request from ('::1', 55837, 0, 0)
+Traceback (most recent call last):
+  File "C:\Program Files\Python313\Lib\socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 1342, in finish_request
+    self.RequestHandlerClass(request, client_address, self,
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                             directory=args.directory)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 683, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 447, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 435, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 690, in do_GET
+    self.copyfile(f, self.wfile)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 892, in copyfile
+    shutil.copyfileobj(source, outputfile)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+    ~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
+----------------------------------------
+::1 - - [12/Oct/2026 16:47:42] "GET /sw.js HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:47:42] code 404, message File not found
+::1 - - [12/Oct/2026 16:47:42] "GET /icon.png HTTP/1.1" 404 -
+::1 - - [12/Oct/2026 16:47:42] "GET /three.js-master/build/three.webgpu.js HTTP/1.1" 200 -
+----------------------------------------
+Exception occurred during processing of request from ('::1', 55840, 0, 0)
+Traceback (most recent call last):
+  File "C:\Program Files\Python313\Lib\socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 1342, in finish_request
+    self.RequestHandlerClass(request, client_address, self,
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                             directory=args.directory)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 683, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 447, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 435, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 690, in do_GET
+    self.copyfile(f, self.wfile)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\http\server.py", line 892, in copyfile
+    shutil.copyfileobj(source, outputfile)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+    ~~~~~~~~~~^^^^^
+  File "C:\Program Files\Python313\Lib\socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
+----------------------------------------
+::1 - - [12/Oct/2026 16:47:53] "GET /three.js-master/build/three.webgpu.js HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 16:48:00] "GET /index.html HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:48:00] code 404, message File not found
+::1 - - [12/Oct/2026 16:48:00] "GET /favicon.ico HTTP/1.1" 404 -
+::1 - - [12/Oct/2026 16:48:00] "GET /style.css HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:48:00] "GET /sw.js HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:48:00] "GET / HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:48:00] code 404, message File not found
+::1 - - [12/Oct/2026 16:48:00] "GET /icon.png HTTP/1.1" 404 -
+::1 - - [12/Oct/2026 16:48:36] "GET /sw.js HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:48:36] "GET / HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:48:36] "GET /index.html HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:48:36] code 404, message File not found
+::1 - - [12/Oct/2026 16:48:36] "GET /icon.png HTTP/1.1" 404 -
+::1 - - [12/Oct/2026 16:48:36] "GET /lib/three/three.core.js HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:48:36] "GET /lib/three/three.module.js HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:49:47] code 404, message File not found
+::1 - - [12/Oct/2026 16:49:47] "GET /favicon.ico HTTP/1.1" 404 -
+::1 - - [12/Oct/2026 16:49:47] "GET /index.html HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:49:48] "GET /style.css HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:49:48] "GET /sw.js HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 16:49:48] "GET /lib/three/three.module.js HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 16:49:48] "GET / HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:49:48] code 404, message File not found
+::1 - - [12/Oct/2026 16:49:48] "GET /icon.png HTTP/1.1" 404 -
+::1 - - [12/Oct/2026 16:49:48] "GET /lib/three/three.core.js HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:49:48] "GET /three.js-master/build/three.webgpu.js HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 16:54:22] code 404, message File not found
+::1 - - [12/Oct/2026 16:54:22] "GET /favicon.ico HTTP/1.1" 404 -
+::1 - - [12/Oct/2026 16:54:23] "GET /index.html HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 16:54:26] "GET /sw.js HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 17:09:05] "GET /index.html HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 17:09:05] "GET /nav3d.js HTTP/1.1" 200 -
+::1 - - [12/Oct/2026 17:09:06] code 404, message File not found
+::1 - - [12/Oct/2026 17:09:06] "GET /favicon.ico HTTP/1.1" 404 -
+::1 - - [12/Oct/2026 17:09:07] "GET /sw.js HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 17:10:29] code 404, message File not found
+::1 - - [12/Oct/2026 17:10:29] "GET /favicon.ico HTTP/1.1" 404 -
+::1 - - [12/Oct/2026 17:10:29] "GET /index.html HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 17:10:31] "GET /sw.js HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 17:11:16] "GET /index.html HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 17:11:17] code 404, message File not found
+::1 - - [12/Oct/2026 17:11:17] "GET /favicon.ico HTTP/1.1" 404 -
+::1 - - [12/Oct/2026 17:11:19] "GET /sw.js HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 17:19:07] code 404, message File not found
+::1 - - [12/Oct/2026 17:19:07] "GET /favicon.ico HTTP/1.1" 404 -
+::1 - - [12/Oct/2026 17:19:07] "GET /index.html HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 17:19:10] "GET /sw.js HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 17:20:48] code 404, message File not found
+::1 - - [12/Oct/2026 17:20:48] "GET /favicon.ico HTTP/1.1" 404 -
+::1 - - [12/Oct/2026 17:20:48] "GET /index.html HTTP/1.1" 304 -
+::1 - - [12/Oct/2026 17:20:50] "GET /sw.js HTTP/1.1" 304 -
