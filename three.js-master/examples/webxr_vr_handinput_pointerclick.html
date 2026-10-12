@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>three.js vr - handinput - point and click</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+		<meta property="og:title" content="three.js vr - handinput - point and click">
+		<meta property="og:type" content="website">
+		<meta property="og:url" content="https://threejs.org/examples/webxr_vr_handinput_pointerclick.html">
+		<meta property="og:image" content="https://threejs.org/examples/screenshots/webxr_vr_handinput_pointerclick.jpg">
+	<link type="text/css" rel="stylesheet" href="main.css">
+</head>
+
+<body>
+
+	<div id="info">
+		<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a>	vr - handinput - point and click<br />
+	</div>
+
+	<script type="importmap">
+		{
+			"imports": {
+				"three": "../build/three.module.js",
+				"three/addons/": "./jsm/"
+			}
+		}
+	</script>
+
+	<script type="module">
+
+		import * as THREE from 'three';
+		import { VRButton } from 'three/addons/webxr/VRButton.js';
+		import { XRControllerModelFactory } from 'three/addons/webxr/XRControllerModelFactory.js';
+		import { OculusHandModel } from 'three/addons/webxr/OculusHandModel.js';
+		import { OculusHandPointerModel } from 'three/addons/webxr/OculusHandPointerModel.js';
+		import { createText } from 'three/addons/webxr/Text2D.js';
+
+		const timer = new THREE.Timer();
+		timer.connect( document );
+		let camera, scene, renderer;
+		let menuMesh, torusKnot, instructionText;
+		let controllers, handPointers;
+		let needsCalibration = true;
+
+		// meshes the hand rays can intersect
+		const intersectables = [];
+
+		// button states: [none, hovered, pressed]
+		const buttons = [];
+
+		init();
+
+		function makeButtonMesh( x, y, z, color ) {
+
+			const geometry = new THREE.BoxGeometry( x, y, z );
+			const material = new THREE.MeshPhongMaterial( { color: color } );
+			const buttonMesh = new THREE.Mesh( geometry, material );
+			buttonMesh.castShadow = true;
+			buttonMesh.receiveShadow = true;
+			return buttonMesh;
+
+		}
+
+		function init() {
+
+			const container = document.createElement( 'div' );
+			document.body.appendChild( container );
+
+			scene = new THREE.Scene();
+			scene.background = new THREE.Color( 0x444444 );
+
+			camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 10 );
+			camera.position.set( 0, 1.2, 0.3 );
+
+			scene.add( new THREE.HemisphereLight( 0xcccccc, 0x999999, 3 ) );
+
+			const light = new THREE.DirectionalLight( 0xffffff, 3 );
+			light.position.set( 0, 6, 0 );
+			light.castShadow = true;
+			light.shadow.camera.top = 2;
+			light.shadow.camera.bottom = - 2;
+			light.shadow.camera.right = 2;
+			light.shadow.camera.left = - 2;
+			light.shadow.mapSize.set( 4096, 4096 );
+			scene.add( light );
+
+			renderer = new THREE.WebGLRenderer( { antialias: true } );
+			renderer.setPixelRatio( window.devicePixelRatio );
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			renderer.setAnimationLoop( animate );
+			renderer.shadowMap.enabled = true;
+			renderer.xr.enabled = true;
+			renderer.xr.cameraAutoUpdate = false;
+
+			container.appendChild( renderer.domElement );
+
+			const sessionInit = {
+				requiredFeatures: [ 'hand-tracking' ]
+			};
+
+			document.body.appendChild( VRButton.createButton( renderer, sessionInit ) );
+
+			// controllers
+			const controller1 = renderer.xr.getController( 0 );
+			scene.add( controller1 );
+
+			const controller2 = renderer.xr.getController( 1 );
+			scene.add( controller2 );
+
+			const controllerModelFactory = new XRControllerModelFactory();
+
+			// Hand 1
+			const controllerGrip1 = renderer.xr.getControllerGrip( 0 );
+			controllerGrip1.add( controllerModelFactory.createControllerModel( controllerGrip1 ) );
+			scene.add( controllerGrip1 );
+
+			const hand1 = renderer.xr.getHand( 0 );
+			hand1.add( new OculusHandModel( hand1 ) );
+			const handPointer1 = new OculusHandPointerModel( hand1, controller1 );
+			hand1.add( handPointer1 );
+
+			scene.add( hand1 );
+
+			// Hand 2
+			const controllerGrip2 = renderer.xr.getControllerGrip( 1 );
+			controllerGrip2.add( controllerModelFactory.createControllerModel( controllerGrip2 ) );
+			scene.add( controllerGrip2 );
+
+			const hand2 = renderer.xr.getHand( 1 );
+			hand2.add( new OculusHandModel( hand2 ) );
+			const handPointer2 = new OculusHandPointerModel( hand2, controller2 );
+			hand2.add( handPointer2 );
+			scene.add( hand2 );
+
+			controllers = [ controllerGrip1, controllerGrip2 ];
+			handPointers = [ handPointer1, handPointer2 ];
+
+			// setup objects in scene and entities
+			const floorGeometry = new THREE.PlaneGeometry( 4, 4 );
+			const floorMaterial = new THREE.MeshPhongMaterial( { color: 0x222222 } );
+			const floor = new THREE.Mesh( floorGeometry, floorMaterial );
+			floor.rotation.x = - Math.PI / 2;
+			floor.receiveShadow = true;
+			scene.add( floor );
+
+			const menuGeometry = new THREE.PlaneGeometry( 0.24, 0.5 );
+			const menuMaterial = new THREE.MeshPhongMaterial( {
+				opacity: 0,
+				transparent: true,
+			} );
+			menuMesh = new THREE.Mesh( menuGeometry, menuMaterial );
+			menuMesh.position.set( 0.4, 1, - 1 );
+			menuMesh.rotation.y = - Math.PI / 12;
+			scene.add( menuMesh );
+
+			const orangeButton = makeButtonMesh( 0.2, 0.1, 0.01, 0xffd3b5 );
+			orangeButton.position.set( 0, 0.18, 0 );
+			menuMesh.add( orangeButton );
+
+			const pinkButton = makeButtonMesh( 0.2, 0.1, 0.01, 0xe84a5f );
+			pinkButton.position.set( 0, 0.06, 0 );
+			menuMesh.add( pinkButton );
+
+			const resetButton = makeButtonMesh( 0.2, 0.1, 0.01, 0x355c7d );
+			const resetButtonText = createText( 'reset', 0.06 );
+			resetButton.add( resetButtonText );
+			resetButtonText.position.set( 0, 0, 0.0051 );
+			resetButton.position.set( 0, - 0.06, 0 );
+			menuMesh.add( resetButton );
+
+			const exitButton = makeButtonMesh( 0.2, 0.1, 0.01, 0xff0000 );
+			const exitButtonText = createText( 'exit', 0.06 );
+			exitButton.add( exitButtonText );
+			exitButtonText.position.set( 0, 0, 0.0051 );
+			exitButton.position.set( 0, - 0.18, 0 );
+			menuMesh.add( exitButton );
+
+			const tkGeometry = new THREE.TorusKnotGeometry( 0.5, 0.2, 200, 32 );
+			const tkMaterial = new THREE.MeshPhongMaterial( { color: 0xffffff } );
+			tkMaterial.metalness = 0.8;
+			torusKnot = new THREE.Mesh( tkGeometry, tkMaterial );
+			torusKnot.position.set( 0, 1, - 5 );
+			scene.add( torusKnot );
+
+			instructionText = createText( 'This is a WebXR Hands demo, please explore with hands.', 0.04 );
+			instructionText.position.set( 0, 1.6, - 0.6 );
+			scene.add( instructionText );
+
+			const exitText = createText( 'Exiting session...', 0.04 );
+			exitText.position.set( 0, 1.5, - 0.6 );
+			exitText.visible = false;
+			scene.add( exitText );
+
+			intersectables.push( menuMesh, orangeButton, pinkButton, resetButton, exitButton );
+
+			buttons.push(
+				{ mesh: orangeButton, currState: 'none', prevState: 'none', action: function () {
+
+					torusKnot.material.color.setHex( 0xffd3b5 );
+
+				} },
+				{ mesh: pinkButton, currState: 'none', prevState: 'none', action: function () {
+
+					torusKnot.material.color.setHex( 0xe84a5f );
+
+				} },
+				{ mesh: resetButton, currState: 'none', prevState: 'none', action: function () {
+
+					torusKnot.material.color.setHex( 0xffffff );
+
+				} },
+				{ mesh: exitButton, currState: 'none', prevState: 'none', action: function () {
+
+					exitText.visible = true;
+					setTimeout( function () {
+
+						exitText.visible = false; renderer.xr.getSession().end();
+
+					}, 2000 );
+
+				} }
+			);
+
+			window.addEventListener( 'resize', onWindowResize );
+
+		}
+
+		function onWindowResize() {
+
+			camera.aspect = window.innerWidth / window.innerHeight;
+			camera.updateProjectionMatrix();
+
+			renderer.setSize( window.innerWidth, window.innerHeight );
+
+		}
+
+		function calibrateMenu() {
+
+			// position the menu relative to the camera once the session has started
+
+			if ( needsCalibration && renderer.xr.getSession() ) {
+
+				const xrCamera = renderer.xr.getCamera();
+				menuMesh.position.x = xrCamera.position.x + 0.4;
+				menuMesh.position.y = xrCamera.position.y;
+				menuMesh.position.z = xrCamera.position.z - 1;
+				needsCalibration = false;
+
+			}
+
+		}
+
+		function updateInstructionText() {
+
+			// the instruction text is only visible as long as motion controllers are used
+
+			instructionText.visible = controllers.some( controller => controller.visible );
+
+		}
+
+		function updateHandRays() {
+
+			handPointers.forEach( hp => {
+
+				let distance = null;
+				let intersectingMesh = null;
+				intersectables.forEach( object => {
+
+					const intersections = hp.intersectObject( object, false );
+					if ( intersections && intersections.length > 0 ) {
+
+						if ( distance == null || intersections[ 0 ].distance < distance ) {
+
+							distance = intersections[ 0 ].distance;
+							intersectingMesh = object;
+
+						}
+
+					}
+
+				} );
+				if ( distance ) {
+
+					hp.setCursor( distance );
+					const button = buttons.find( button => button.mesh === intersectingMesh );
+					if ( button !== undefined ) {
+
+						if ( hp.isPinched() ) {
+
+							button.currState = 'pressed';
+
+						} else if ( button.currState != 'pressed' ) {
+
+							button.currState = 'hovered';
+
+						}
+
+					}
+
+				} else {
+
+					hp.setCursor( 1.5 );
+
+				}
+
+			} );
+
+		}
+
+		function updateButtons() {
+
+			buttons.forEach( button => {
+
+				if ( button.currState == 'none' ) {
+
+					button.mesh.scale.set( 1, 1, 1 );
+
+				} else {
+
+					button.mesh.scale.set( 1.1, 1.1, 1.1 );
+
+				}
+
+				if ( button.currState == 'pressed' && button.prevState != 'pressed' ) {
+
+					button.action();
+
+				}
+
+				// preserve prevState, clear currState
+				// updateHandRays() will update currState
+
+				button.prevState = button.currState;
+				button.currState = 'none';
+
+			} );
+
+		}
+
+		function animate() {
+
+			timer.update();
+
+			const delta = timer.getDelta();
+			renderer.xr.updateCamera( camera );
+
+			calibrateMenu();
+			updateInstructionText();
+			updateHandRays();
+			updateButtons();
+
+			torusKnot.rotation.x += 0.4 * delta;
+			torusKnot.rotation.y += 0.4 * delta;
+
+			renderer.render( scene, camera );
+
+		}
+
+	</script>
+</body>
+
+</html>
