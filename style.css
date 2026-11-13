@@ -843,6 +843,120 @@ body::before {
 }
 
 /* ═════════════════════════════════════════════════════════════════════
+   UPLOAD SCREEN
+   ═════════════════════════════════════════════════════════════════════ */
+.upload-box {
+  border: 2px dashed var(--border-strong);
+  border-radius: var(--radius);
+  padding: 36px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  cursor: pointer;
+  background: var(--bg-card);
+  text-align: center;
+  width: calc(100% - 32px);
+  max-width: 420px;
+  position: relative;
+  transition: all 0.15s ease;
+  box-shadow: var(--shadow-25d);
+}
+
+.upload-box:hover {
+  border-color: var(--cyan);
+  background: var(--bg-card-hover);
+}
+
+.upload-box input[type="file"] {
+  display: none;
+}
+
+.upload-box svg {
+  width: 44px;
+  height: 44px;
+  color: var(--cyan);
+  opacity: 0.85;
+  filter: drop-shadow(0 0 10px rgba(0, 229, 255, 0.4));
+}
+
+.upload-box span {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.5;
+}
+
+.album-select {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.album-select:focus {
+  border-color: var(--cyan);
+}
+
+.upload-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  width: calc(100% - 32px);
+  max-width: 420px;
+  margin-top: 10px;
+}
+
+.upload-preview-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--bg-panel-alt);
+}
+
+.upload-preview-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.remove-preview {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(5, 8, 17, 0.85);
+  border: 1px solid var(--border);
+  color: #fff;
+  font-size: 14px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.remove-preview:hover {
+  background: var(--danger);
+  border-color: var(--danger);
+}
+
+/* ═════════════════════════════════════════════════════════════════════
    NOTES & RICH TEXT EDITOR
    ═════════════════════════════════════════════ */
 .notes-grid {
@@ -1337,6 +1451,86 @@ body::before {
   display: block;
 }
 
+/* Schedule Due Chips */
+.sched-card-due-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(245, 238, 56, 0.15);
+  color: var(--splat-yellow);
+  border: 1px solid rgba(245, 238, 56, 0.35);
+  white-space: nowrap;
+}
+
+.sched-card-due-chip svg {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+
+.sched-card-due-chip.overdue {
+  background: rgba(255, 42, 112, 0.15);
+  color: var(--splat-pink);
+  border-color: rgba(255, 42, 112, 0.4);
+}
+
+.sched-card-due-chip.ok {
+  background: rgba(43, 247, 132, 0.15);
+  color: var(--splat-green);
+  border-color: rgba(43, 247, 132, 0.4);
+}
+
+/* Schedule Priority Selector in Modal */
+.sched-priority-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.sched-priority-btn {
+  padding: 10px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-panel-alt);
+  color: var(--text-dim);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sched-priority-btn:hover {
+  border-color: var(--border-strong);
+  color: #fff;
+}
+
+.sched-priority-btn.active-urgent {
+  background: rgba(255, 42, 112, 0.2);
+  border-color: var(--splat-pink);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(255, 42, 112, 0.35);
+}
+
+.sched-priority-btn.active-medium {
+  background: var(--cyan-dim);
+  border-color: var(--cyan);
+  color: #fff;
+  box-shadow: 0 0 10px var(--cyan-glow);
+}
+
+.sched-priority-btn.active-normal {
+  background: rgba(43, 247, 132, 0.2);
+  border-color: var(--splat-green);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(43, 247, 132, 0.35);
+}
+
 /* ═════════════════════════════════════════════════════════════════════
    NETWORK INFO SCREEN
    ═════════════════════════════════════════════ */
@@ -1719,6 +1913,12 @@ body::before {
   margin: 12px auto;
 }
 
+.qr-preview-box svg {
+  width: 200px;
+  height: 200px;
+  display: block;
+}
+
 .qr-textarea {
   width: 100%;
   min-height: 86px;
@@ -1770,7 +1970,13 @@ body::before {
 }
 
 /* Buttons System */
-.btn-primary, .upload-btn, .imgpdf-export-btn, .qr-download-btn {
+.btn-primary, .upload-btn, .imgpdf-export-btn, .qr-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.qr-download-btn {
   padding: 14px 20px;
   background: var(--cyan);
   border: none;
@@ -2489,7 +2695,41 @@ body::before {
   width: 100%;
   height: 100%;
   display: block;
-  touch-action: none; /* prevent browser scroll during ring drag (s.9) */
+  touch-action: none; /* prevent browser scroll during ring drag */
+}
+
+#nav3d-switch-classic {
+  position: absolute;
+  top: max(14px, env(safe-area-inset-top));
+  right: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border-strong);
+  background: rgba(13, 21, 46, 0.82);
+  backdrop-filter: blur(10px);
+  color: var(--text-dim);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  cursor: pointer;
+  z-index: 410;
+  transition: all 0.15s ease;
+}
+
+#nav3d-switch-classic:hover {
+  color: var(--cyan);
+  border-color: var(--cyan);
+  background: rgba(13, 21, 46, 0.95);
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.35);
+}
+
+#nav3d-switch-classic:active {
+  transform: scale(0.96);
 }
 
 #nav3d-hint {
@@ -2507,17 +2747,38 @@ body::before {
 }
 
 #nav3d-back {
-  position: absolute;
-  top: 14px;
-  left: 14px;
-  padding: 10px 18px;
-  border-radius: 10px;
-  border: 1px solid var(--border-strong);
-  background: rgba(13, 21, 46, 0.85);
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  right: 14px;
+  z-index: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--cyan-border);
+  background: rgba(9, 14, 31, 0.92);
+  backdrop-filter: blur(12px);
   color: var(--cyan);
-  font-size: 13px;
-  font-weight: 700;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
   cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 10px rgba(0, 229, 255, 0.25);
+  transition: all 0.15s ease;
+}
+
+#nav3d-back:hover {
+  background: rgba(13, 21, 46, 0.98);
+  border-color: var(--cyan);
+  box-shadow: 0 0 16px rgba(0, 229, 255, 0.45);
+  transform: translateY(-1px);
+}
+
+#nav3d-back:active {
+  transform: scale(0.96);
 }
 
 #nav3d-fallback {

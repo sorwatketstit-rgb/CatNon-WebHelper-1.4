@@ -5,14 +5,14 @@
 // ═════════════════════════════════════════════════════════════════════
 
 const NAV3D_TOOLS = [
-  { id: 'schedule',   label: 'Schedule',  sub: 'Tasks & plans',  color: 0xf5ee38 },
-  { id: 'notes',      label: 'Notes',     sub: 'Rich-text docs', color: 0x00e5ff },
-  { id: 'pictures',   label: 'Gallery',   sub: 'Albums & media', color: 0xff2a70 },
-  { id: 'filedrop',   label: 'FileDrop',  sub: 'P2P transfer',   color: 0x2bf784 },
-  { id: 'netinfo',    label: 'Network',   sub: 'Diagnostics',    color: 0x2979ff },
-  { id: 'backtracker',label: 'Backtracker', sub: 'GPS tracing',  color: 0xffa726 },
-  { id: 'imgpdf',     label: 'Image→PDF', sub: 'Converter',      color: 0xb388ff },
-  { id: 'qr',         label: 'QR Code',   sub: 'Exports PNG',    color: 0x00e5ff },
+  { id: 'schedule',    label: 'Schedule',    sub: 'Tasks & plans',  color: 0xf5ee38 },
+  { id: 'notes',       label: 'Notes',       sub: 'Rich-text docs', color: 0x00e5ff },
+  { id: 'pictures',    label: 'Gallery',     sub: 'Albums & media', color: 0xff2a70 },
+  { id: 'filedrop',    label: 'FileDrop',    sub: 'P2P transfer',   color: 0x2bf784 },
+  { id: 'netinfo',     label: 'Network',     sub: 'Diagnostics',    color: 0x2979ff },
+  { id: 'backtracker', label: 'Backtracker', sub: 'GPS tracing',    color: 0xffa726 },
+  { id: 'imgpdf',      label: 'Image→PDF',   sub: 'Converter',      color: 0xb388ff },
+  { id: 'qr',          label: 'QR Code',     sub: 'Exports PNG',    color: 0x00e5ff },
 ];
 
 const NAV3D_STATE = {
@@ -21,13 +21,13 @@ const NAV3D_STATE = {
 let nav3dState = NAV3D_STATE.IDLE; // HUB_IDLE
 
 const NAV3D_CONFIG = {
-  ringRadius: 5.2,
-  ringTiltX: -0.42,
+  ringRadius: 5.0,
+  ringTiltX: 0.42,
   ringTiltZ: 0.08,
-  camFOV: 50,
-  openDuration: 620,   // ms — spec: hub→ring 350–650
-  closeDuration: 420,
-  inertia: 0.92,       // rotational friction per frame (config s.5)
+  camFOV: 48,
+  openDuration: 580,   // ms — spec: hub→ring 350–650
+  closeDuration: 380,
+  inertia: 0.92,       // rotational friction per frame
   flickGain: 0.35,     // release velocity → residual angular velocity
   snapAngle: Math.PI / NAV3D_TOOLS.length / 2, // subtle snap target
   debounceMs: 220,     // tap-vs-drag threshold
@@ -35,12 +35,13 @@ const NAV3D_CONFIG = {
 
 // ── Globals ─────────────────────────────────────────────────────────
 let renderer, scene, camera, canvas;
-let hubGroup, ringGroup, panelMeshes = [], hubMesh;
-let ringLights;
+let hubGroup, ringGroup, panelMeshes = [], hubMesh, hubHalo;
+let ringGuide;
 let activeToolId = null;
 let lastRingRotation = 0;      // restored on back
 let bubbleMesh, bubbleT = -1;
 let geoCache = {};
+let matCache = {};
 let isDragging = false;
 let dragAngle = 0, lastPointerAngle = 0, dragVel = 0;
 let pointerStart = { x: 0, y: 0 };
@@ -48,13 +49,11 @@ let movedBeyondThreshold = false;
 let idleT = 0;
 let clock = null;
 let renderPaused = false;
+let hoveredPanelIdx = -1;
 
 const redMode = (() => { // reduced motion
   return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 })();
-
-// ── Shared helpers (pre-allocated; no per-frame allocation) ──────────
-const _v = new (window.THREE ? THREE.Vector3 : Object)();
 
 // ── Geometry/material caches ────────────────────────────────────────
 function getGeometry(key, builder) {
@@ -62,17 +61,24 @@ function getGeometry(key, builder) {
   return geoCache[key];
 }
 function getMaterial(key, props) {
-  if (!geoCache[key]) geoCache[key] = new THREE.MeshStandardMaterial(props);
-  return geoCache[key];
+  if (!matCache[key]) matCache[key] = new THREE.MeshStandardMaterial(props);
+  return matCache[key];
 }
 
 // ═════════════════════════════════════════════════════════════════════
 // SCENE / CAMERA SETUP (concern 1)
 // ═════════════════════════════════════════════════════════════════════
 function nav3dInit() {
-  if (!window.THREE) { nav3dFallback('three.js not loaded'); return; }
+  if (renderer) return; // already initialized
+  if (!window.THREE) {
+    nav3dFallback('three.js not loaded');
+    return;
+  }
   canvas = document.getElementById('nav3d-canvas');
-  if (!canvas) { nav3dFallback('canvas missing'); return; }
+  if (!canvas) {
+    nav3dFallback('canvas missing');
+    return;
+  }
 
   try {
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
@@ -80,7 +86,7 @@ function nav3dInit() {
     nav3dFallback('WebGL unavailable: ' + err.message);
     return;
   }
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2)); // s.10 DPR clamp
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.setClearColor(0x050811, 1);
 
   scene = new THREE.Scene();
@@ -88,28 +94,28 @@ function nav3dInit() {
   clock = new THREE.Clock();
 
   camera = new THREE.PerspectiveCamera(NAV3D_CONFIG.camFOV, 1, 0.1, 100);
-  camera.position.set(0, 1.6, 11.5);
+  camera.position.set(0, 3.5, 10.5);
   camera.lookAt(0, 0, 0);
 
-  scene.add(new THREE.AmbientLight(0x223a66, 1.1));
-  const key = new THREE.DirectionalLight(0x9fc5ff, 1.2);
-  key.position.set(4, 6, 8);
+  scene.add(new THREE.AmbientLight(0x223a66, 1.2));
+  const key = new THREE.DirectionalLight(0x9fc5ff, 1.3);
+  key.position.set(4, 7, 8);
   scene.add(key);
-  const rim = new THREE.DirectionalLight(0x00e5ff, 0.55);
-  rim.position.set(-6, 2, -4);
+  const rim = new THREE.DirectionalLight(0x00e5ff, 0.65);
+  rim.position.set(-6, 3, -4);
   scene.add(rim);
-  const under = new THREE.DirectionalLight(0x123a5c, 0.5);
+  const under = new THREE.DirectionalLight(0x123a5c, 0.55);
   under.position.set(0, -5, 3);
   scene.add(under);
 
   buildHub();
-  buildRing();   // data-driven panels; hidden until open
+  buildRing();
   buildBubble();
 
   nav3dResize();
   window.addEventListener('resize', nav3dResize);
   document.addEventListener('visibilitychange', () => {
-    renderPaused = document.hidden; // s.10 pause when hidden
+    renderPaused = document.hidden;
   });
 
   bindPointerEvents();
@@ -118,18 +124,18 @@ function nav3dInit() {
   nav3dLoop();
 }
 
-// ── Responsive framing (s.9): portrait vs landscape/desktop ─────────
+// ── Responsive framing: portrait vs landscape/desktop ───────────────
 function nav3dResize() {
+  if (!camera || !renderer) return;
   const w = window.innerWidth, h = window.innerHeight;
   camera.aspect = w / h;
   const portrait = h >= w;
-  // Deliberate portrait framing per spec; desktop gets a wider, closer view.
-  NAV3D_CONFIG.ringRadius = portrait ? Math.min(w / 46 + 4.0, 5.6) : 6.4;
-  camera.fov = portrait ? 55 : 42;
-  camera.position.z = portrait ? 12.4 : 11.0;
+  NAV3D_CONFIG.ringRadius = portrait ? Math.min(w / 48 + 3.8, 5.0) : 5.8;
+  camera.fov = portrait ? 54 : 42;
+  camera.position.z = portrait ? 12.2 : 10.8;
   camera.updateProjectionMatrix();
   renderer.setSize(w, h, false);
-  if (ringGroup) ringGroup.scale.setScalar(portrait ? 0.92 : 1.0);
+  if (ringGroup) ringGroup.scale.setScalar(portrait ? 0.94 : 1.0);
 }
 
 // ═════════════════════════════════════════════════════════════════════
@@ -139,46 +145,65 @@ function buildHub() {
   hubGroup = new THREE.Group();
   scene.add(hubGroup);
 
-  // Layered disc geometry: base disc + beveled ring + glow ring
-  const discGeo = getGeometry('hub-disc', () => new THREE.CylinderGeometry(2.05, 2.15, 0.55, 48));
+  // Disc sits in XZ plane with slight tilt toward camera
+  const discGeo = getGeometry('hub-disc', () => new THREE.CylinderGeometry(2.05, 2.15, 0.35, 48));
   const discMat = getMaterial('hub-disc', {
-    color: 0x101c38, metalness: 0.75, roughness: 0.35,
-    emissive: 0x0a1830, emissiveIntensity: 0.4,
+    color: 0x101e3b, metalness: 0.8, roughness: 0.28,
+    emissive: 0x00e5ff, emissiveIntensity: 0.75,
   });
   hubMesh = new THREE.Mesh(discGeo, discMat);
-  hubMesh.rotation.x = Math.PI / 2;
   hubGroup.add(hubMesh);
 
-  // Illuminated ring (emblem placeholder — spec s.2)
-  const ringGeo = getGeometry('hub-ring', () => new THREE.TorusGeometry(1.72, 0.075, 12, 64));
+  // Concentric glowing halo torus in XZ plane
+  const ringGeo = getGeometry('hub-ring', () => new THREE.TorusGeometry(2.32, 0.065, 14, 64));
   const ringMat = getMaterial('hub-ring', {
-    color: 0x00e5ff, emissive: 0x00e5ff, emissiveIntensity: 0.9, metalness: 0.2, roughness: 0.4,
+    color: 0x2979ff, emissive: 0x00e5ff, emissiveIntensity: 1.8, metalness: 0.3, roughness: 0.2,
   });
-  const halo = new THREE.Mesh(ringGeo, ringMat);
-  halo.rotation.x = Math.PI / 2;
-  halo.position.y = 0.3;
-  hubGroup.add(halo);
+  hubHalo = new THREE.Mesh(ringGeo, ringMat);
+  hubHalo.rotation.x = Math.PI / 2; // Torus rotated into XZ plane
+  hubGroup.add(hubHalo);
 
-  // CatNon wordmark as camera-facing sprite (label legibility rule, s.4)
-  const mark = makeTextSprite('CATNON HELPER', 26, '#e8f4ff');
-  mark.scale.set(2.6, 0.5, 1);
-  mark.position.y = 0.34;
+  // Inner accent ring
+  const innerGeo = getGeometry('hub-inner-ring', () => new THREE.TorusGeometry(1.6, 0.032, 10, 48));
+  const innerHalo = new THREE.Mesh(innerGeo, ringMat);
+  innerHalo.rotation.x = Math.PI / 2;
+  innerHalo.position.y = 0.18;
+  hubGroup.add(innerHalo);
+
+  // CatNon wordmark as camera-facing sprite
+  const mark = makeTextSprite('CATNON HELPER', 'Tap hub to enter', '#00e5ff');
+  mark.scale.set(3.0, 0.75, 1);
+  mark.position.y = 0.44;
   hubGroup.add(mark);
 
-  hubGroup.rotation.x = NAV3D_CONFIG.ringTiltX * 0.35;
-  hubGroup.position.y = 0.2;
+  hubGroup.rotation.x = NAV3D_CONFIG.ringTiltX * 0.45;
+  hubGroup.position.y = 0.15;
 }
 
-// Camera-facing canvas-texture label — reused for panels
-function makeTextSprite(text, px, color) {
+// Camera-facing canvas-texture label — crisp text rendering
+function makeTextSprite(title, sub, colorHex) {
   const c = document.createElement('canvas');
-  c.width = 512; c.height = 96;
+  c.width = 512;
+  c.height = 128;
   const g = c.getContext('2d');
-  g.font = `800 ${px}px "DM Sans", system-ui, sans-serif`;
-  g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.shadowColor = 'rgba(0,229,255,0.55)'; g.shadowBlur = 12;
-  g.fillStyle = color;
-  g.fillText(text, 256, 48);
+  g.textAlign = 'center';
+  g.textBaseline = 'middle';
+
+  // Title with glow
+  g.font = '800 36px "DM Sans", -apple-system, sans-serif';
+  g.fillStyle = '#ffffff';
+  g.shadowColor = colorHex || '#00e5ff';
+  g.shadowBlur = 14;
+  g.fillText(title, 256, 46);
+
+  // Subtitle
+  if (sub) {
+    g.font = '700 20px "DM Sans", -apple-system, sans-serif';
+    g.fillStyle = colorHex || 'rgba(0,229,255,0.85)';
+    g.shadowBlur = 6;
+    g.fillText(sub, 256, 92);
+  }
+
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false });
@@ -186,8 +211,32 @@ function makeTextSprite(text, px, color) {
 }
 
 // ═════════════════════════════════════════════════════════════════════
-// RADIAL RING — data-driven tapered panels (concerns 3, 4)
+// RADIAL RING — Tapered panels (concerns 3, 4)
 // ═════════════════════════════════════════════════════════════════════
+function createTaperedPanelGeometry() {
+  const shape = new THREE.Shape();
+  const innerW = 0.95; // narrower inner edge toward ring center
+  const outerW = 1.30; // wider outer edge
+  const halfD = 0.72;  // radial depth
+  shape.moveTo(-innerW, -halfD);
+  shape.lineTo(innerW, -halfD);
+  shape.lineTo(outerW, halfD);
+  shape.lineTo(-outerW, halfD);
+  shape.closePath();
+
+  const geo = new THREE.ExtrudeGeometry(shape, {
+    depth: 0.16,
+    bevelEnabled: true,
+    bevelSegments: 2,
+    steps: 1,
+    bevelSize: 0.035,
+    bevelThickness: 0.03,
+  });
+  geo.center(); // Center local pivot at (0, 0, 0)
+  geo.rotateX(Math.PI / 2); // Lay flat in XZ with height along Y
+  return geo;
+}
+
 function buildRing() {
   ringGroup = new THREE.Group();
   ringGroup.visible = false;
@@ -197,50 +246,66 @@ function buildRing() {
 
   const n = NAV3D_TOOLS.length;
   const seg = (Math.PI * 2) / n;
-
-  const wedgeGeo = getGeometry('panel-wedge', () =>
-    new THREE.CylinderGeometry(NAV3D_CONFIG.ringRadius - 1.15, NAV3D_CONFIG.ringRadius, 0.16, 4, 1, false, seg * 0.62)
-  );
+  const panelGeo = getGeometry('panel-wedge', createTaperedPanelGeometry);
 
   NAV3D_TOOLS.forEach((tool, i) => {
-    const panel = new THREE.Mesh(wedgeGeo, new THREE.MeshStandardMaterial({
-      color: 0x16264a, metalness: 0.7, roughness: 0.42,
-      emissive: 0x0a1a38, emissiveIntensity: 0.35,
-      transparent: true, opacity: 0,
+    const hexStr = '#' + tool.color.toString(16).padStart(6, '0');
+    const panel = new THREE.Mesh(panelGeo, new THREE.MeshStandardMaterial({
+      color: 0x122244,
+      metalness: 0.75,
+      roughness: 0.35,
+      emissive: tool.color,
+      emissiveIntensity: 0.28,
+      transparent: true,
+      opacity: 0,
     }));
     panel.userData.toolIndex = i;
 
-    // Angular placement — outward-facing, inner edge inclined to center (s.6)
+    // Outer edge glowing accent strip
+    const accentGeo = getGeometry('panel-accent', () => new THREE.BoxGeometry(1.6, 0.04, 0.08));
+    const accentMat = getMaterial(`panel-accent-${tool.id}`, {
+      color: tool.color,
+      emissive: tool.color,
+      emissiveIntensity: 1.2,
+      roughness: 0.2,
+    });
+    const accentMesh = new THREE.Mesh(accentGeo, accentMat);
+    accentMesh.position.set(0, 0.11, 0.62);
+    panel.add(accentMesh);
+
+    // Angular placement around ring
     const angle = i * seg;
+    const r = NAV3D_CONFIG.ringRadius;
     panel.position.set(
-      Math.cos(angle) * NAV3D_CONFIG.ringRadius * 0.82,
+      Math.cos(angle) * r,
       0,
-      Math.sin(angle) * NAV3D_CONFIG.ringRadius * 0.82
+      Math.sin(angle) * r
     );
-    panel.rotation.y = -angle - seg * 0.31; // orient wedge outward
+    // Align narrower edge inward, wider edge outward
+    panel.rotation.y = -angle + Math.PI / 2;
     panel.userData.homeAngle = angle;
 
-    // Icon sprite (camera-facing, label legibility)
-    const icon = makeTextSprite(tool.label.toUpperCase(), 20, '#00e5ff');
-    icon.scale.set(1.9, 0.36, 1);
-    icon.position.set(0, 0.42, 0);
-    panel.add(icon);
+    // Crisp title + subtitle sprite floating just above panel
+    const label = makeTextSprite(tool.label.toUpperCase(), tool.sub, hexStr);
+    label.scale.set(2.2, 0.55, 1);
+    label.position.set(0, 0.32, 0);
+    panel.add(label);
 
     ringGroup.add(panel);
     panelMeshes.push(panel);
   });
 
-  // Ring guide torus (visual continuity from hub halo)
-  const guide = new THREE.Mesh(
-    getGeometry('ring-guide', () => new THREE.TorusGeometry(NAV3D_CONFIG.ringRadius * 0.82, 0.045, 8, 96)),
-    getMaterial('ring-guide', { color: 0x0a5cff, emissive: 0x0a5cff, emissiveIntensity: 0.55, transparent: true, opacity: 0.75 })
+  // Ring guide torus (visual continuity)
+  ringGuide = new THREE.Mesh(
+    getGeometry('ring-guide', () => new THREE.TorusGeometry(NAV3D_CONFIG.ringRadius, 0.038, 8, 96)),
+    getMaterial('ring-guide', { color: 0x2979ff, emissive: 0x00e5ff, emissiveIntensity: 0.9, transparent: true, opacity: 0.75 })
   );
-  guide.rotation.x = Math.PI / 2;
-  ringGroup.add(guide);
+  ringGuide.rotation.x = Math.PI / 2;
+  ringGroup.add(ringGuide);
 }
 
 // ═════════════════════════════════════════════════════════════════════
-// WATER-BUBBLE TRANSITION MESH (concern 7) — simple shader, no fluid sim
+// WATER-BUBBLE TRANSITION MESH (concern 7)
 // ═════════════════════════════════════════════════════════════════════
 function buildBubble() {
   const geo = new THREE.SphereGeometry(1, 32, 24, 0, Math.PI * 2, 0, Math.PI / 2);
@@ -253,9 +318,9 @@ function buildBubble() {
       void main() {
         vUv = uv;
         vec3 p = position;
-        p.y *= mix(0.05, 6.5, uProgress);
-        p.x *= mix(0.6, 14.0, uProgress);
-        p.z *= 3.0;
+        p.y *= mix(0.05, 20.0, uProgress);
+        p.x *= mix(0.6, 32.0, uProgress);
+        p.z *= mix(0.6, 32.0, uProgress);
         gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
       }`,
     fragmentShader: `
@@ -263,19 +328,19 @@ function buildBubble() {
       varying vec2 vUv;
       void main() {
         float rim = smoothstep(0.0, 0.25, vUv.y) * smoothstep(1.0, 0.75, vUv.y);
-        vec3 col = mix(vec3(0.0, 0.55, 0.85), vec3(0.0, 0.9, 1.0), vUv.y);
-        float alpha = mix(0.85, 0.98, vUv.y);
-        gl_FragColor = vec4(col, alpha * mix(0.6, 1.0, rim));
+        vec3 col = mix(vec3(0.0, 0.65, 0.95), vec3(0.0, 0.95, 1.0), vUv.y);
+        float alpha = mix(0.85, 0.98, vUv.y) * smoothstep(0.0, 0.08, uProgress);
+        gl_FragColor = vec4(col, alpha * mix(0.7, 1.0, rim));
       }`,
   });
   bubbleMesh = new THREE.Mesh(geo, mat);
-  bubbleMesh.position.set(0, -7.5, 3);
+  bubbleMesh.position.set(0, -6.5, 4);
   bubbleMesh.visible = false;
   scene.add(bubbleMesh);
 }
 
 // ═════════════════════════════════════════════════════════════════════
-// OPEN / CLOSE TRANSFORMATION (concern 3) — reversible
+// OPEN / CLOSE TRANSFORMATION (concern 3)
 // ═════════════════════════════════════════════════════════════════════
 function openRing() {
   if (nav3dState !== NAV3D_STATE.IDLE) return;
@@ -283,18 +348,24 @@ function openRing() {
   ringGroup.visible = true;
 
   const t0 = performance.now();
-  const dur = redMode ? 240 : NAV3D_CONFIG.openDuration;
+  const dur = redMode ? 220 : NAV3D_CONFIG.openDuration;
 
-  // Hub tap feedback: compression pulse (spec seq.1)
+  // Hub tap pulse feedback
   hubMesh.scale.set(1.15, 0.7, 1.15);
   const pulseEnd = performance.now() + 160;
+
+  const hint = document.getElementById('nav3d-hint');
+  if (hint) {
+    hint.textContent = 'Drag to rotate ring · Tap panel to open · Esc to close';
+    hint.style.opacity = '1';
+  }
 
   function animStep() {
     const t = Math.min(1, (performance.now() - t0) / dur);
     const e = 1 - Math.pow(1 - t, 3); // cubic ease-out
 
-    ringGroup.scale.setScalar(0.35 + 0.65 * e);        // expand outward
-    ringGroup.rotation.y = (1 - e) * 1.2;               // unfold spin
+    ringGroup.scale.setScalar(0.35 + 0.65 * e);
+    ringGroup.rotation.y = (1 - e) * 1.2;
     panelMeshes.forEach((p, i) => {
       const stagger = Math.max(0, t - (i * 0.12 / NAV3D_TOOLS.length)) / (1 - i * 0.12 / NAV3D_TOOLS.length);
       p.material.opacity = Math.min(1, stagger);
@@ -306,7 +377,7 @@ function openRing() {
     } else {
       hubMesh.scale.set(1, 1, 1);
     }
-    hubGroup.visible = t < 0.5; // hub dissolves as ring takes over (continuity)
+    hubGroup.visible = t < 0.5;
 
     if (t < 1) requestAnimationFrame(animStep);
     else {
@@ -314,14 +385,12 @@ function openRing() {
       ringGroup.scale.setScalar(1);
       ringGroup.rotation.y = 0;
       nav3dState = NAV3D_STATE.RING; // RING_INTERACTIVE
-      ringLights && (ringLights.visible = true);
     }
   }
   animStep();
 }
 
 function attachHubTap() {
-  // Hub tap → open ring (pointerdown on canvas while IDLE)
   canvas.addEventListener('pointerdown', e => {
     if (nav3dState !== NAV3D_STATE.IDLE) return;
     const r = canvas.getBoundingClientRect();
@@ -331,9 +400,7 @@ function attachHubTap() {
     );
     const rc = new THREE.Raycaster();
     rc.setFromCamera(ndc, camera);
-    if (rc.intersectObject(hubMesh, false).length) {
-      const hint = document.getElementById('nav3d-hint');
-      if (hint) hint.style.opacity = '0';
+    if (rc.intersectObjects([hubMesh, hubHalo], true).length) {
       openRing();
     }
   });
@@ -341,10 +408,16 @@ function attachHubTap() {
 
 function closeRing() {
   if (nav3dState !== NAV3D_STATE.RING) return;
-  nav3dState = NAV3D_STATE.IDLE; // intermediate; loop keeps rendering
+  nav3dState = NAV3D_STATE.IDLE;
   const t0 = performance.now();
   const dur = redMode ? 180 : NAV3D_CONFIG.closeDuration;
   const startScale = ringGroup.scale.x, startRotY = ringGroup.rotation.y;
+
+  const hint = document.getElementById('nav3d-hint');
+  if (hint) {
+    hint.textContent = 'Tap the hub to enter · Drag around to rotate';
+    hint.style.opacity = '1';
+  }
 
   function animStep() {
     const t = Math.min(1, (performance.now() - t0) / dur);
@@ -357,7 +430,7 @@ function closeRing() {
     else {
       ringGroup.visible = false;
       hubGroup.visible = true;
-      nav3dState = NAV3D_STATE.IDLE; // HUB_IDLE
+      nav3dState = NAV3D_STATE.IDLE;
     }
   }
   animStep();
@@ -367,8 +440,6 @@ function closeRing() {
 // GESTURE: circular drag + tap-vs-drag (concern 5)
 // ═════════════════════════════════════════════════════════════════════
 function pointerAngle(x, y) {
-  // Screen center = ring center (camera looks at 0,0,0 — acceptable for
-  // this camera framing; perspective offset is small at this distance).
   const r = canvas.getBoundingClientRect();
   const cx = r.left + r.width / 2;
   const cy = r.top + r.height / 2;
@@ -385,17 +456,36 @@ function bindPointerEvents() {
       lastPointerAngle = pointerAngle(e.clientX, e.clientY);
       dragVel = 0;
       canvas.setPointerCapture(e.pointerId);
+      canvas.style.cursor = 'grabbing';
     }
   });
 
   canvas.addEventListener('pointermove', e => {
+    // Hover cursor feedback
+    if (!isDragging) {
+      const r = canvas.getBoundingClientRect();
+      const ndc = new THREE.Vector2(
+        ((e.clientX - r.left) / r.width) * 2 - 1,
+        -((e.clientY - r.top) / r.height) * 2 + 1
+      );
+      const rc = new THREE.Raycaster();
+      rc.setFromCamera(ndc, camera);
+
+      if (nav3dState === NAV3D_STATE.IDLE) {
+        const hits = rc.intersectObjects([hubMesh, hubHalo], true);
+        canvas.style.cursor = hits.length ? 'pointer' : 'default';
+      } else if (nav3dState === NAV3D_STATE.RING) {
+        const hits = rc.intersectObjects(panelMeshes, true);
+        canvas.style.cursor = hits.length ? 'pointer' : 'grab';
+      }
+    }
+
     if (!isDragging || nav3dState !== NAV3D_STATE.RING) return;
     const dist = Math.hypot(e.clientX - pointerStart.x, e.clientY - pointerStart.y);
-    if (dist > 12) movedBeyondThreshold = true;
+    if (dist > 10) movedBeyondThreshold = true;
 
     const a = pointerAngle(e.clientX, e.clientY);
     let d = a - lastPointerAngle;
-    // Angle wrapping across the ±π boundary (spec s.5)
     if (d > Math.PI) d -= 2 * Math.PI;
     else if (d < -Math.PI) d += 2 * Math.PI;
     dragVel = d;
@@ -406,12 +496,13 @@ function bindPointerEvents() {
   canvas.addEventListener('pointerup', e => {
     const wasDragging = isDragging;
     isDragging = false;
+    canvas.style.cursor = nav3dState === NAV3D_STATE.RING ? 'grab' : 'default';
     if (nav3dState !== NAV3D_STATE.RING) return;
 
     if (wasDragging && !movedBeyondThreshold) {
-      handleTap(e.clientX, e.clientY);      // tap → maybe select panel
-    } else if (Math.abs(dragVel) > 0.06) {
-      dragVel *= NAV3D_CONFIG.flickGain;    // restrained inertia (s.5)
+      handleTap(e.clientX, e.clientY);
+    } else if (Math.abs(dragVel) > 0.05) {
+      dragVel *= NAV3D_CONFIG.flickGain;
     } else {
       dragVel = 0;
     }
@@ -419,7 +510,6 @@ function bindPointerEvents() {
 }
 
 function handleTap(x, y) {
-  // Raycast the pointer into the ring plane to find an intersected panel
   const r = canvas.getBoundingClientRect();
   const ndc = new THREE.Vector2(
     ((x - r.left) / r.width) * 2 - 1,
@@ -427,8 +517,16 @@ function handleTap(x, y) {
   );
   const rc = new THREE.Raycaster();
   rc.setFromCamera(ndc, camera);
-  const hits = rc.intersectObjects(panelMeshes, false);
-  if (hits.length) selectPanel(hits[0].object.userData.toolIndex);
+  const hits = rc.intersectObjects(panelMeshes, true);
+  if (hits.length) {
+    let obj = hits[0].object;
+    while (obj && obj.userData.toolIndex === undefined && obj !== ringGroup) {
+      obj = obj.parent;
+    }
+    if (obj && obj.userData.toolIndex !== undefined) {
+      selectPanel(obj.userData.toolIndex);
+    }
+  }
 }
 
 // ═════════════════════════════════════════════════════════════════════
@@ -439,22 +537,22 @@ function selectPanel(idx) {
   const tool = NAV3D_TOOLS[idx];
   const panel = panelMeshes[idx];
 
-  nav3dState = NAV3D_STATE.TO_TOOL;  // block further menu input (spec seq.2)
+  nav3dState = NAV3D_STATE.TO_TOOL;
   activeToolId = tool.id;
-  lastRingRotation = ringGroup.rotation.y;  // restore on back (s.8)
+  lastRingRotation = ringGroup.rotation.y;
 
-  // Selection confirm: highlight compress (spec seq.1)
-  panel.scale.set(1.08, 0.85, 1.08);
+  // Tactile selection feedback
+  panel.scale.set(1.1, 0.85, 1.1);
   panel.material.emissiveIntensity = 1.4;
 
-  const delay = redMode ? 120 : 280;
+  const delay = redMode ? 100 : 260;
   setTimeout(() => startBubble(tool), delay);
 }
 
 function startBubble(tool) {
   bubbleMesh.visible = true;
   bubbleT = 0;
-  const dur = redMode ? 260 : 620; // spec: 400–700
+  const dur = redMode ? 240 : 560;
 
   const t0 = performance.now();
   function animStep() {
@@ -470,13 +568,14 @@ function startBubble(tool) {
 }
 
 function showTool(tool) {
-  // Reveal the EXISTING utility screen — no redesign, no data changes (s.8)
   ringGroup.visible = false;
   bubbleMesh.visible = false;
   canvas.style.display = 'none';
-  document.getElementById('nav3d-overlay').classList.remove('active');
-  document.getElementById('nav3d-back').style.display = '';
-  nav3dState = NAV3D_STATE.TOOL; // TOOL_ACTIVE
+  const ov = document.getElementById('nav3d-overlay');
+  if (ov) ov.classList.remove('active');
+  const backBtn = document.getElementById('nav3d-back');
+  if (backBtn) backBtn.style.display = 'inline-flex';
+  nav3dState = NAV3D_STATE.TOOL;
   if (window.showScreen) window.showScreen(tool.id);
 }
 
@@ -484,12 +583,13 @@ function backToHub() {
   if (nav3dState !== NAV3D_STATE.TOOL) return;
   nav3dState = NAV3D_STATE.TO_HUB;
 
-  document.getElementById('nav3d-overlay').classList.add('active');
-  document.getElementById('nav3d-back').style.display = 'none';
+  const ov = document.getElementById('nav3d-overlay');
+  if (ov) ov.classList.add('active');
+  const backBtn = document.getElementById('nav3d-back');
+  if (backBtn) backBtn.style.display = 'none';
   canvas.style.display = '';
 
-  // Reverse bubble, then restore previous ring state (spec s.8)
-  const dur = redMode ? 220 : 480;
+  const dur = redMode ? 220 : 460;
   bubbleMesh.visible = true;
   const t0 = performance.now();
   function animStep() {
@@ -498,52 +598,52 @@ function backToHub() {
     if (p < 1) requestAnimationFrame(animStep);
     else {
       bubbleMesh.visible = false;
-      canvas.style.display = '';
-      ringGroup.rotation.y = lastRingRotation;          // restore rotation
-      panelMeshes.forEach((pm, i) => {
+      ringGroup.visible = true;
+      ringGroup.rotation.y = lastRingRotation; // Exact rotational restoration
+      panelMeshes.forEach(pm => {
         pm.scale.set(1, 1, 1);
-        pm.material.emissiveIntensity = pm.userData.toolIndex === i ? 0.35 : 0.35;
+        pm.material.emissiveIntensity = 0.28;
       });
-      nav3dState = NAV3D_STATE.RING;  // RING_INTERACTIVE, rotation preserved
+      nav3dState = NAV3D_STATE.RING; // Restored interactive ring state
     }
   }
   animStep();
 }
 
 // ═════════════════════════════════════════════════════════════════════
-// ANIMATION LOOP (concerns: idle bobbing, inertia, snap, bubble)
+// ANIMATION LOOP (concerns: idle bobbing, inertia, snap)
 // ═════════════════════════════════════════════════════════════════════
 function nav3dLoop() {
   requestAnimationFrame(nav3dLoop);
-  if (renderPaused || document.hidden) return;   // s.10 pause hidden
+  if (renderPaused || document.hidden || !renderer || !scene || !camera) return;
   const dt = Math.min(clock.getDelta(), 0.05);
 
   idleT += dt;
   if (nav3dState === NAV3D_STATE.IDLE) {
-    // Gentle float + subtle X/Z tilt (spec s.1, s.2)
+    // Gentle float + tilt
     if (!redMode) {
-      hubGroup.position.y = 0.2 + Math.sin(idleT * 1.2) * 0.14;
-      hubGroup.rotation.x = NAV3D_CONFIG.ringTiltX * 0.35 + Math.sin(idleT * 0.7) * 0.06;
-      hubGroup.rotation.z = NAV3D_CONFIG.ringTiltZ + Math.cos(idleT * 0.55) * 0.05;
+      hubGroup.position.y = 0.15 + Math.sin(idleT * 1.3) * 0.12;
+      hubGroup.rotation.x = NAV3D_CONFIG.ringTiltX * 0.45 + Math.sin(idleT * 0.75) * 0.05;
+      hubGroup.rotation.z = Math.cos(idleT * 0.6) * 0.04;
     }
   } else if (nav3dState === NAV3D_STATE.RING) {
-    // Inertia friction + subtle snap (independently of idle bobbing; s.6)
+    // Inertia friction
     if (!redMode && !isDragging && Math.abs(dragVel) > 0.0015) {
       ringGroup.rotation.y += dragVel;
       dragVel *= NAV3D_CONFIG.inertia;
     }
-    // Subtle snap to panel alignment after slowing (config-gated, s.5)
+    // Subtle snap
     if (!redMode && !isDragging && Math.abs(dragVel) <= 0.0015) {
       const seg = (Math.PI * 2) / NAV3D_TOOLS.length;
       const n = Math.round(ringGroup.rotation.y / seg);
       const target = n * seg;
-      ringGroup.rotation.y += (target - ringGroup.rotation.y) * 0.08; // gentle
+      ringGroup.rotation.y += (target - ringGroup.rotation.y) * 0.08;
     }
-    // Ring idle: gentle bob + tilt on top of user rotation, never overwrites it
+    // Gentle ring bobbing
     if (!redMode && !isDragging) {
-      ringGroup.position.y = Math.sin(idleT * 1.1) * 0.1;
-      ringGroup.rotation.x = NAV3D_CONFIG.ringTiltX + Math.sin(idleT * 0.6) * 0.035;
-      ringGroup.rotation.z = NAV3D_CONFIG.ringTiltZ + Math.cos(idleT * 0.5) * 0.03;
+      ringGroup.position.y = Math.sin(idleT * 1.1) * 0.08;
+      ringGroup.rotation.x = NAV3D_CONFIG.ringTiltX + Math.sin(idleT * 0.6) * 0.03;
+      ringGroup.rotation.z = NAV3D_CONFIG.ringTiltZ + Math.cos(idleT * 0.5) * 0.025;
     }
   }
 
@@ -551,17 +651,24 @@ function nav3dLoop() {
 }
 
 // ═════════════════════════════════════════════════════════════════════
-// KEYBOARD: accessible alternative (spec s.5 "alternatives")
+// KEYBOARD ACCESSIBILITY
 // ═════════════════════════════════════════════════════════════════════
 function bindKeyboard() {
   window.addEventListener('keydown', e => {
     if (nav3dState === NAV3D_STATE.IDLE && (e.key === 'Enter' || e.key === ' ')) {
-      openRing(); e.preventDefault();
+      openRing();
+      e.preventDefault();
     } else if (nav3dState === NAV3D_STATE.RING) {
       const seg = (Math.PI * 2) / NAV3D_TOOLS.length;
-      if (e.key === 'ArrowLeft') { ringGroup.rotation.y -= seg; dragVel = 0; }
-      else if (e.key === 'ArrowRight') { ringGroup.rotation.y += seg; dragVel = 0; }
-      else if (e.key === 'Escape') closeRing();
+      if (e.key === 'ArrowLeft') {
+        ringGroup.rotation.y -= seg;
+        dragVel = 0;
+      } else if (e.key === 'ArrowRight') {
+        ringGroup.rotation.y += seg;
+        dragVel = 0;
+      } else if (e.key === 'Escape') {
+        closeRing();
+      }
       e.preventDefault();
     } else if (nav3dState === NAV3D_STATE.TOOL && e.key === 'Escape') {
       backToHub();
@@ -569,13 +676,8 @@ function bindKeyboard() {
   });
 }
 
-// Public API used by index.html inline handlers
-function nav3dOpenRing() { openRing(); }
-function nav3dCloseRing() { closeRing(); }
-function nav3dBackToHub() { backToHub(); }
-
 // ═════════════════════════════════════════════════════════════════════
-// NON-WEBGL FALLBACK (spec s.10)
+// NON-WEBGL FALLBACK & DISPOSE
 // ═════════════════════════════════════════════════════════════════════
 function nav3dFallback(reason) {
   console.warn('nav3d fallback:', reason);
@@ -588,29 +690,53 @@ function nav3dFallback(reason) {
   if (canvas) canvas.style.display = 'none';
 }
 
-// Cleanup (spec s.10)
 function nav3dDispose() {
   cancelAnimationFrame(nav3dLoop);
   window.removeEventListener('resize', nav3dResize);
   renderer && renderer.dispose();
   Object.values(geoCache).forEach(o => o.dispose && o.dispose());
+  Object.values(matCache).forEach(o => o.dispose && o.dispose());
   geoCache = {};
+  matCache = {};
 }
 
-// Boot when app is ready
+// Robust auto-boot
+function tryInitNav3D() {
+  if (window.THREE) {
+    nav3dInit();
+  } else {
+    window.addEventListener('app:ready', e => {
+      if (e.detail && e.detail.three) nav3dInit();
+      else nav3dFallback('three.js failed to load');
+    }, { once: true });
+    // Safety fallback
+    setTimeout(() => {
+      if (!window.THREE && !renderer) {
+        nav3dFallback('three.js load timeout');
+      }
+    }, 3000);
+  }
+}
+
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', nav3dInit);
+  document.addEventListener('DOMContentLoaded', tryInitNav3D);
 } else {
-  nav3dInit();
+  tryInitNav3D();
 }
 
-// Expose minimal global API
+// Expose public API
 window.nav3d = {
-  openRing: nav3dOpenRing,
-  closeRing: nav3dCloseRing,
+  openRing,
+  closeRing,
   backFromTool: backToHub,
   backToHubFn: backToHub,
   state: () => nav3dState,
   tools: NAV3D_TOOLS,
-  resume() { renderPaused = false; },  // re-entering overlay from More screen
+  resume() {
+    renderPaused = false;
+    if (!renderer && window.THREE) nav3dInit();
+  },
+  debug() {
+    return { hub: hubGroup, ring: ringGroup, scene, camera, renderer };
+  },
 };

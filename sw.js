@@ -1,10 +1,11 @@
-const CACHE_NAME = 'catnon-helper-v9';
+const CACHE_NAME = 'catnon-helper-v11';
 const PRECACHE = [
   './',
   './index.html',
   './style.css',
   './manifest.json',
   './icon.png',
+  './nav3d.js',
   './lib/three/three.core.js',
   './lib/three/three.module.js',
   './three.js-master/build/three.webgpu.js',
